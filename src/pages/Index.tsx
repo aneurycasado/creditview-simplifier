@@ -4,11 +4,13 @@ import { CategoryCard } from "@/components/CategoryCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { analyzeCreditReport } from "@/utils/claude";
 
 const Index = () => {
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState(mockCategories);
 
   // Mock data for initial display
   const mockCategories = [
@@ -56,15 +58,36 @@ const Index = () => {
     }
 
     setLoading(true);
-    // Here we would normally process the file and analyze it
-    // For now, we'll just show a success message
-    setTimeout(() => {
+    try {
+      const text = await file.text();
+      const analysis = await analyzeCreditReport(text);
+      
+      if (analysis.error) {
+        throw new Error(analysis.error);
+      }
+
+      // Parse the response and update categories
+      const parsedAnalysis = JSON.parse(analysis.content[0]);
+      const newCategories = Object.entries(parsedAnalysis).map(([title, details]) => ({
+        title,
+        status: "good" as const, // You might want to add logic to determine status
+        details: details as string[],
+      }));
+
+      setCategories(newCategories);
       toast({
         title: "Success",
         description: "Credit report analyzed successfully",
       });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to analyze report",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -87,7 +110,7 @@ const Index = () => {
             <CreditScoreCard score={785} change={15} />
           </div>
           
-          {mockCategories.map((category, index) => (
+          {categories.map((category, index) => (
             <CategoryCard
               key={index}
               title={category.title}
