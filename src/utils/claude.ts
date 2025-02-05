@@ -38,7 +38,7 @@ export const analyzeCreditReport = async (reportText: string): Promise<ClaudeRes
 
     const data = await response.json();
     return {
-      content: data.content
+      content: [data.content[0].text]
     };
   } catch (error) {
     console.error('Error analyzing credit report:', error);

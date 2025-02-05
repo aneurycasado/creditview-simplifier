@@ -10,9 +10,7 @@ const Index = () => {
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState(mockCategories);
-
-  // Mock data for initial display
+  
   const mockCategories = [
     {
       title: "Payment Activity",
@@ -40,6 +38,8 @@ const Index = () => {
       details: ["98% overall payment history", "Strong payment pattern established"],
     },
   ];
+
+  const [categories, setCategories] = useState(mockCategories);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
